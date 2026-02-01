@@ -1,23 +1,108 @@
-# LLM Distillation Practice
+# LLM Distillation Project
 
-This folder is for practicing LLM distillation using a pretrained DeepSeek model. Follow the steps below to get started:
+Knowledge distillation framework for training smaller student models from larger teacher models using soft targets (KL divergence).
 
-## Steps to Follow:
-1. **Download the Pretrained DeepSeek Model**: 
-   - Ensure you have the model files saved in this directory.
+![Teacher vs Student Comparison](fig/teacher_student_comparison.png)
 
-2. **Set Up Your Environment**:
-   - Create a virtual environment (optional but recommended).
-   - Install necessary packages (e.g., TensorFlow, PyTorch, etc.).
+## Quick Start
 
-3. **Load the Model**:
-   - Use the appropriate library to load the pretrained model.
+### 1. Download Teacher Model
+```bash
+python scripts/download_deepseek_model.py
+```
 
-4. **Prepare Your Dataset**:
-   - Format your dataset for distillation.
+### 2. Explore and Download Dataset
+```bash
+python scripts/explore_datasets.py --dataset dbpedia --validation-split 0.2
+```
 
-5. **Implement Distillation Logic**:
-   - Write the code to perform distillation using the loaded model and prepared dataset.
+### 3. Train Student Model with Knowledge Distillation
+
+```bash
+python scripts/train_soft_distillation.py \
+  --dataset dbpedia \
+  --teacher-model models/DeepSeek-R1-Distill-Qwen-1.5B \
+  --student-model Qwen/Qwen2.5-0.5B \
+  --epochs 3 \
+  --batch-size 4 \
+  --max-length 128 \
+  --temperature 3.0 \
+  --alpha 0.7
+```
+
+**What this does:**
+- Loads both teacher and student models
+- Teacher runs in eval mode (frozen, no gradients)
+- Each training step:
+  1. Teacher generates soft targets for batch
+  2. Student learns from teacher's distribution (KL divergence)
+  3. Student also learns from true labels (cross-entropy)
+- Combined loss: `0.7 × KL_loss + 0.3 × CE_loss`
+
+### 4. Evaluate and Compare
+
+```bash
+python scripts/compare_models.py \
+  --teacher-model models/DeepSeek-R1-Distill-Qwen-1.5B \
+  --student-model outputs/student_soft_distill/.../best_model \
+  --dataset dbpedia
+```
+
+## Quick Testing
+
+Test with a small subset before full training:
+
+```bash
+python scripts/train_soft_distillation.py \
+  --dataset dbpedia \
+  --teacher-model models/DeepSeek-R1-Distill-Qwen-1.5B \
+  --student-model Qwen/Qwen2.5-0.5B \
+  --max-train-samples 100 \
+  --max-val-samples 100 \
+  --batch-size 2 \
+  --max-length 128 \
+  --epochs 2
+```
+
+**Memory Tips for Apple MPS:**
+- Start with small `--max-train-samples` (50-100)
+- Use `--batch-size 2` or even `1`
+- Keep `--max-length 128` or lower
+- Consider smaller student models: `prajjwal1/bert-tiny`, `distilbert-base-uncased`
+
+## Architecture
+
+- **Teacher**: DeepSeek-R1-Distill-Qwen-1.5B (~1.5B params, frozen)
+- **Student**: Qwen/Qwen2.5-0.5B (~0.5B params, 3x compression)
+- **Dataset**: DBpedia 14-class classification (448k train, 112k val, 70k test)
+- **Method**: Knowledge Distillation with soft targets
+- **Loss**: `α × KL(teacher||student) + (1-α) × CE(truth, student)`
+  - Temperature: 3.0 (softer distributions for better knowledge transfer)
+  - Alpha: 0.7 (70% distillation, 30% supervised learning)
+
+## Project Structure
+
+```
+llm-distill/
+├── scripts/
+│   ├── download_deepseek_model.py     # Download teacher model
+│   ├── explore_datasets.py            # Dataset discovery & download
+│   ├── train_soft_distillation.py     # Knowledge distillation training
+│   └── compare_models.py              # Evaluate & compare models
+├── data/
+│   └── dbpedia/                       # Downloaded datasets
+│       ├── train/
+│       ├── validation/
+│       └── test/
+├── models/
+│   └── DeepSeek-R1-Distill-Qwen-1.5B/ # Teacher model
+└── outputs/
+    └── student_soft_distill/          # Trained student checkpoints
+        └── dbpedia_T3.0_A0.7_*/
+            ├── best_model/
+            ├── final_model/
+            └── history.json
+```
 
 6. **Run Experiments**:
    - Execute your distillation process and evaluate the results.
