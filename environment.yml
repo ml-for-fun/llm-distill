@@ -1,0 +1,59 @@
+name: llm-distill
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+
+dependencies:
+  # Python version
+  - python=3.10
+  
+  # PyTorch with CUDA support (adjust cuda version as needed)
+  # For CPU-only: remove cudatoolkit and use pytorch-cpu
+  - pytorch>=2.1.0
+  - torchvision>=0.16.0
+  - torchaudio>=2.1.0
+  - pytorch-cuda=12.1  # Remove this line for CPU-only or Apple Silicon
+  
+  # NumPy (must be <2.0 for PyTorch compatibility)
+  - numpy>=1.24.0,<2.0
+  
+  # Visualization and analysis
+  - matplotlib>=3.7.0
+  - scikit-learn>=1.3.0
+  
+  # Development tools
+  - pip>=23.0
+  - git
+  - jupyter
+  - ipykernel
+  
+  # Pip-installed packages (not available via conda or better via pip)
+  - pip:
+      # HuggingFace ecosystem
+      - huggingface-hub>=0.20.0
+      - transformers>=4.36.0
+      - datasets>=2.16.0
+      - accelerate>=0.25.0
+      
+      # Tokenizers and model formats
+      - tokenizers>=0.15.0
+      - safetensors>=0.4.0
+      - sentencepiece>=0.1.99
+      
+      # Efficient training
+      - bitsandbytes>=0.41.0
+      - peft>=0.7.0
+      
+      # Utilities
+      - tqdm>=4.66.0
+      - scikit-learn>=1.3.0
+      - pyyaml>=6.0
+      
+      # Logging and tracking
+      - tensorboard>=2.15.0
+      - wandb>=0.16.0
+      
+      # Jupyter widgets
+      - ipywidgets>=8.1.0
