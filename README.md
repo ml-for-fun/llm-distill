@@ -1,5 +1,11 @@
 # LLM Distillation Project
 
+![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
+![PyTorch](https://img.shields.io/badge/PyTorch-2.2.2-EE4C2C.svg?logo=pytorch)
+![Transformers](https://img.shields.io/badge/🤗%20Transformers-4.45.0-yellow.svg)
+![Apple MPS](https://img.shields.io/badge/Apple%20MPS-supported-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+
 Knowledge distillation framework for training smaller student models from larger teacher models using soft targets (KL divergence).
 
 ![Teacher vs Student Comparison](fig/teacher_student_comparison.png)
